@@ -191,8 +191,8 @@ async function callGeminiVision(base64Image, promptText, retryCount = 0) {
   }
 
   if (!response.ok) {
-    if (response.status === 503 && retryCount < 1) {
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+    if ((response.status === 503 || response.status === 504) && retryCount < 1) {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       return callGeminiVision(base64Image, promptText, retryCount + 1);
     }
     if (response.status === 429) {
