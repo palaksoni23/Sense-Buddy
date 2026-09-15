@@ -1,4 +1,4 @@
-# SenseBuddy
+# SenseBuddy🫂
 Made by Palak Soni
 
 An accessibility companion web app with two modes:
@@ -65,4 +65,7 @@ This uses Gemini's free tier under the hood (no billing on your end), which has 
 
 ## Credits
 Designed and built by **Palak Soni** for the Build, Ship, Shape: Amazon Developer Hackathon.
+
+## Live Link
+🔗https://sense-buddy-frontend.onrender.com
 
