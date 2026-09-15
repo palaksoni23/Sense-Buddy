@@ -1,0 +1,39 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B4FE0"/>
+      <stop offset="100%" stop-color="#8EC9FF"/>
+    </linearGradient>
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#EAF1FF"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="110" fill="url(#bg)"/>
+
+  <!-- antenna -->
+  <line x1="256" y1="120" x2="256" y2="80" stroke="#FFD966" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="256" cy="66" r="22" fill="#FFD966"/>
+
+  <!-- head -->
+  <rect x="126" y="120" width="260" height="220" rx="80" fill="url(#bodyGrad)"/>
+
+  <!-- cheeks -->
+  <ellipse cx="168" cy="270" rx="24" ry="14" fill="#FFC1D9" opacity="0.8"/>
+  <ellipse cx="344" cy="270" rx="24" ry="14" fill="#FFC1D9" opacity="0.8"/>
+
+  <!-- big cute eye -->
+  <circle cx="256" cy="225" r="62" fill="#2A3B8F"/>
+  <circle cx="256" cy="225" r="44" fill="#4C63E8"/>
+  <circle cx="256" cy="225" r="25" fill="#131A44"/>
+  <circle cx="244" cy="210" r="10" fill="#FFFFFF"/>
+
+  <!-- smile -->
+  <path d="M 208 288 Q 256 320 304 288" stroke="#2A3B8F" stroke-width="9" stroke-linecap="round" fill="none"/>
+
+  <!-- body base -->
+  <rect x="176" y="340" width="160" height="100" rx="45" fill="url(#bodyGrad)"/>
+  <circle cx="256" cy="392" r="26" fill="#FFD966"/>
+  <path d="M 245 392 L 253 402 L 270 380" stroke="#8A6B00" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

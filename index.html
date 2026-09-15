@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>SenseBuddy — a sense for those who need one</title>
+<meta name="description" content="SenseBuddy — an accessibility companion that becomes your eyes or your voice." />
+
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icons/icon-32.png" />
+<link rel="apple-touch-icon" href="icons/icon-180.png" />
+<meta name="theme-color" content="#2A3B8F" />
+
+<style>
+  :root {
+    --indigo: #2A3B8F;
+    --buddy-blue: #4C63E8;
+    --sky: #8EC9FF;
+    --yellow: #FFD966;
+    --pink: #FFC1D9;
+    --bg: #F5F7FF;
+    --text: #131A44;
+    --muted: #5b6280;
+    --card: #FFFFFF;
+    --border: #e2e7ff;
+  }
+
+  [data-theme="dark"] {
+    --bg: #0F1330;
+    --text: #EAEBFF;
+    --muted: #9AA0C0;
+    --card: #1B2050;
+    --border: #2E3570;
+  }
+
+  [data-theme="dark"] .camera-placeholder {
+    background: repeating-linear-gradient(135deg, #232A5E, #232A5E 12px, #1B2050 12px, #1B2050 24px);
+  }
+
+  [data-theme="dark"] .panel-visual {
+    background: linear-gradient(160deg, #1B2050, #232A5E);
+  }
+
+  [data-theme="dark"] .feature-card,
+  [data-theme="dark"] .install-banner,
+  [data-theme="dark"] .mode-switch {
+    background: var(--card);
+  }
+
+  [data-theme="dark"] .btn-outline {
+    background: var(--card);
+    color: #C9CEFF;
+  }
+
+  [data-theme="dark"] .live-toggle-row,
+  [data-theme="dark"] .result-box,
+  [data-theme="dark"] textarea#messageInput,
+  [data-theme="dark"] .text-input,
+  [data-theme="dark"] .mic-inline-btn {
+    background: #151A3D;
+    color: var(--text);
+    border-color: var(--border);
+  }
+
+  [data-theme="dark"] .btn-outline {
+    border-color: var(--border);
+  }
+
+  [data-theme="dark"] .divider-label::before,
+  [data-theme="dark"] .divider-label::after {
+    background: var(--border);
+  }
+
+  [data-theme="dark"] .mode-switch button {
+    color: var(--muted);
+  }
+
+  body {
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    overflow-x: hidden;
+  }
+
+  @font-face { font-family: 'Baloo'; src: local('Baloo 2'); }
+
+  .hero {
+    position: relative;
+    background: linear-gradient(160deg, var(--indigo), var(--buddy-blue) 45%, var(--sky), var(--buddy-blue) 90%);
+    background-size: 300% 300%;
+    animation: gradientFlow 16s ease infinite;
+    overflow: hidden;
+    padding-bottom: 70px;
+  }
+
+  @keyframes gradientFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .bg-blob {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.14);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .blob1 { width: 140px; height: 140px; top: 10%; left: 6%; animation: float1 8s ease-in-out infinite; }
+  .blob2 { width: 80px; height: 80px; top: 18%; right: 10%; animation: float2 6s ease-in-out infinite; }
+  .blob3 { width: 50px; height: 50px; bottom: 18%; left: 18%; animation: float1 7s ease-in-out infinite reverse; }
+  .blob4 { width: 100px; height: 100px; bottom: 8%; right: 14%; animation: float2 9s ease-in-out infinite; }
+
+  @keyframes float1 {
+    0%, 100% { transform: translateY(0px) translateX(0px); }
+    50% { transform: translateY(-26px) translateX(14px); }
+  }
+  @keyframes float2 {
+    0%, 100% { transform: translateY(0px) translateX(0px); }
+    50% { transform: translateY(20px) translateX(-16px); }
+  }
+
+  nav {
+    position: relative;
+    z-index: 2;
+    max-width: 1160px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 28px 0;
+  }
+
+  .brand { display: flex; align-items: center; gap: 12px; }
+
+  .brand img {
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    animation: mascotBob 3s ease-in-out infinite;
+  }
+
+  @keyframes mascotBob {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-4px) rotate(-4deg); }
+    75% { transform: translateY(-2px) rotate(4deg); }
+  }
+
+  .brand span {
+    font-family: 'Baloo', sans-serif;
+    font-size: 20px;
+    color: #fff;
+    font-weight: 700;
+  }
+
+  nav a.cta {
+    background: #fff;
+    color: var(--indigo);
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease;
+  }
+  nav a.cta:hover { transform: translateY(-2px); }
+
+  .nav-icons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    font-size: 17px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
+  .icon-btn:active { transform: scale(0.92); }
+
+  .hero-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 50px 24px 0;
+  }
+
+  .hero-inner .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    padding: 7px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 22px;
+    animation: slideDown 0.6s ease;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-inner h1 {
+    font-family: 'Baloo', sans-serif;
+    font-size: clamp(34px, 6vw, 58px);
+    color: #fff;
+    margin: 0 0 18px;
+    line-height: 1.08;
+    letter-spacing: -1px;
+    animation: slideDown 0.7s ease;
+  }
+
+  .hero-inner h1 .accent { color: var(--yellow); }
+
+  .hero-inner p.lead {
+    color: rgba(255,255,255,0.9);
+    font-size: 18px;
+    max-width: 560px;
+    margin: 0 auto 34px;
+    line-height: 1.6;
+    animation: slideDown 0.8s ease;
+  }
+
+  .hero-mascot-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 6px;
+    animation: slideDown 0.9s ease;
+  }
+
+  .hero-mascot-wrap img {
+    width: 120px;
+    height: 120px;
+    border-radius: 32px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    animation: mascotFloat 3.4s ease-in-out infinite;
+  }
+
+  @keyframes mascotFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-14px) rotate(3deg); }
+  }
+
+  main {
+    max-width: 1160px;
+    margin: -46px auto 60px;
+    padding: 0 20px;
+    position: relative;
+    z-index: 3;
+  }
+
+  .install-banner {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    box-shadow: 0 10px 30px rgba(20,30,90,0.15);
+    animation: slideDown 0.5s ease;
+  }
+
+  .install-banner button {
+    background: var(--indigo);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 9px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .mode-switch {
+    display: inline-flex;
+    background: #fff;
+    border-radius: 999px;
+    padding: 5px;
+    margin-bottom: 26px;
+    box-shadow: 0 10px 30px rgba(20,30,90,0.15);
+  }
+
+  .mode-switch button {
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-weight: 700;
+    font-size: 14px;
+    padding: 13px 26px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.25s ease, color 0.25s ease;
+  }
+
+  .mode-switch button.active {
+    background: linear-gradient(135deg, var(--buddy-blue), var(--indigo));
+    color: #fff;
+    animation: popIn 0.3s ease;
+  }
+
+  @keyframes popIn {
+    0% { transform: scale(0.92); }
+    60% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
+  .panel {
+    background: var(--card);
+    border-radius: 28px;
+    box-shadow: 0 20px 50px rgba(20, 30, 90, 0.15);
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    overflow: hidden;
+    animation: cardIn 0.5s cubic-bezier(0.2, 0.8, 0.3, 1.1);
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(18px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @media (max-width: 860px) {
+    .panel { grid-template-columns: 1fr; }
+  }
+
+  .panel-visual {
+    background: linear-gradient(160deg, #eef1ff, #dde5ff);
+    padding: 34px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+
+  .panel-form { padding: 34px; }
+
+  .panel h2 {
+    font-family: 'Baloo', sans-serif;
+    font-size: 24px;
+    margin: 0 0 8px;
+  }
+
+  .panel .sub {
+    font-size: 15px;
+    color: var(--muted);
+    margin: 0 0 22px;
+    line-height: 1.5;
+  }
+
+  video#cameraFeed {
+    width: 100%;
+    border-radius: 20px;
+    background: #10142c;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    box-shadow: 0 14px 30px rgba(20,30,90,0.25);
+  }
+
+  .camera-placeholder {
+    width: 100%;
+    aspect-ratio: 4/3;
+    border-radius: 20px;
+    background: repeating-linear-gradient(135deg, #dfe6ff, #dfe6ff 12px, #d3dcff 12px, #d3dcff 24px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    animation: pulseSoft 2.4s ease-in-out infinite;
+  }
+
+  @keyframes pulseSoft {
+    0%, 100% { opacity: 0.85; }
+    50% { opacity: 1; }
+  }
+
+  .big-btn {
+    width: 100%;
+    border: none;
+    border-radius: 16px;
+    padding: 17px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    margin-top: 16px;
+  }
+
+  .big-btn:first-of-type { margin-top: 0; }
+  .big-btn:active { transform: scale(0.96); }
+  .big-btn:hover { transform: translateY(-2px); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--buddy-blue), var(--indigo));
+    color: #fff;
+    box-shadow: 0 10px 22px rgba(76, 99, 232, 0.35);
+  }
+
+  .btn-yellow {
+    background: var(--yellow);
+    color: #4a3900;
+    box-shadow: 0 10px 22px rgba(255, 217, 102, 0.4);
+    animation: wiggle 3.5s ease-in-out infinite;
+  }
+
+  @keyframes wiggle {
+    0%, 88%, 100% { transform: rotate(0deg); }
+    90% { transform: rotate(-2deg); }
+    94% { transform: rotate(2deg); }
+    97% { transform: rotate(-1deg); }
+  }
+
+  .big-btn.pulse-once { animation: pressPop 0.35s ease; }
+  @keyframes pressPop {
+    0% { transform: scale(1); }
+    40% { transform: scale(0.92); }
+    100% { transform: scale(1); }
+  }
+
+  .btn-outline {
+    background: #fff;
+    color: var(--indigo);
+    border: 2px solid #e2e7ff;
+  }
+  .btn-outline:hover { border-color: var(--buddy-blue); }
+
+  .result-box {
+    margin-top: 20px;
+    background: var(--bg);
+    border-radius: 16px;
+    padding: 18px;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 70px;
+    border: 1px solid #e2e7ff;
+  }
+
+  .result-box.placeholder { color: #9aa0c0; font-style: italic; }
+
+  .result-box.pop { animation: resultPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  @keyframes resultPop {
+    0% { opacity: 0; transform: scale(0.9) translateY(8px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  textarea#messageInput {
+    width: 100%;
+    min-height: 100px;
+    border-radius: 16px;
+    border: 2px solid #e2e7ff;
+    padding: 16px;
+    font-size: 15px;
+    font-family: inherit;
+    resize: vertical;
+  }
+  textarea#messageInput:focus { outline: none; border-color: var(--buddy-blue); }
+
+  .btn-row { display: flex; gap: 10px; }
+  .btn-row .big-btn { margin-top: 16px; }
+
+  .mic-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 14px;
+  }
+
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #ccc; }
+  .dot.live { background: #ff5b5b; animation: pulse 1.2s infinite; }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255,91,91,0.5); }
+    70% { box-shadow: 0 0 0 8px rgba(255,91,91,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,91,91,0); }
+  }
+
+  .speaking-wave { display: none; align-items: center; gap: 3px; margin-left: 4px; }
+  .speaking-wave.active { display: inline-flex; }
+  .speaking-wave span {
+    display: block; width: 3px; height: 10px;
+    background: currentColor; border-radius: 2px;
+    animation: waveBar 0.9s ease-in-out infinite;
+  }
+  .speaking-wave span:nth-child(2) { animation-delay: 0.15s; }
+  .speaking-wave span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes waveBar { 0%, 100% { height: 6px; } 50% { height: 16px; } }
+
+  .divider-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 28px 0 18px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .divider-label::before, .divider-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e2e7ff;
+  }
+
+  /* ---------- Live toggle switch ---------- */
+  .live-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin: 16px 0;
+    gap: 12px;
+  }
+
+  .live-toggle-row strong { font-size: 14px; }
+  .tiny-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #d5dafc;
+    border-radius: 999px;
+    transition: 0.25s;
+  }
+  .switch .slider::before {
+    position: absolute;
+    content: "";
+    height: 22px; width: 22px;
+    left: 3px; bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.25s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+  .switch input:checked + .slider {
+    background: linear-gradient(135deg, var(--buddy-blue), var(--indigo));
+  }
+  .switch input:checked + .slider::before { transform: translateX(20px); }
+  .switch input:checked + .slider {
+    animation: liveGlow 1.6s ease-in-out infinite;
+  }
+  @keyframes liveGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(76,99,232,0.35); }
+    50% { box-shadow: 0 0 0 6px rgba(76,99,232,0); }
+  }
+
+  /* ---------- Hazard banner ---------- */
+  .hazard-banner {
+    background: #FFECEC;
+    border: 2px solid #FF7A7A;
+    color: #B00020;
+    font-weight: 700;
+    font-size: 14px;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    animation: hazardPulse 1s ease-in-out infinite, resultPop 0.3s ease;
+  }
+  @keyframes hazardPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,122,122,0.45); }
+    50% { box-shadow: 0 0 0 8px rgba(255,122,122,0); }
+  }
+
+  .text-input {
+    flex: 1;
+    padding: 15px;
+    border-radius: 14px;
+    border: 2px solid #e2e7ff;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .text-input:focus { outline: none; border-color: var(--buddy-blue); }
+
+  .mic-inline { width: auto; flex: 0 0 56px; padding: 15px 0; }
+
+  .question-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .mic-inline-btn {
+    flex: 0 0 52px;
+    border-radius: 14px;
+    border: 2px solid #e2e7ff;
+    background: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.2s ease;
+  }
+  .mic-inline-btn:hover { border-color: var(--buddy-blue); }
+  .mic-inline-btn:active { transform: scale(0.94); }
+  .mic-inline-btn.live {
+    background: #FFECEC;
+    border-color: #FF7A7A;
+    animation: pulse 1.2s infinite;
+  }
+
+  .features {
+    max-width: 1160px;
+    margin: 0 auto 60px;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 760px) {
+    .features { grid-template-columns: 1fr; }
+  }
+
+  .feature-card {
+    background: #fff;
+    border-radius: 22px;
+    padding: 26px;
+    box-shadow: 0 10px 26px rgba(20,30,90,0.08);
+    transition: transform 0.25s ease;
+  }
+  .feature-card:hover { transform: translateY(-4px); }
+
+  .feature-card .emoji { font-size: 30px; display: inline-block; margin-bottom: 12px; }
+
+  .feature-card h3 {
+    font-family: 'Baloo', sans-serif;
+    font-size: 17px;
+    margin: 0 0 8px;
+  }
+
+  .feature-card p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  footer {
+    text-align: center;
+    padding: 30px 20px 40px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  footer strong { color: var(--indigo); }
+
+  .settings-link { text-align: center; margin-bottom: 6px; }
+  .settings-link a {
+    color: var(--muted);
+    font-size: 13px;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  dialog#apiKeyDialog {
+    border: none;
+    border-radius: 20px;
+    padding: 0;
+    width: 90%;
+    max-width: 380px;
+    background: var(--card);
+    color: var(--text);
+  }
+  dialog#apiKeyDialog .inner { padding: 26px; }
+  dialog#apiKeyDialog h3 { margin-top: 0; font-family: 'Baloo', sans-serif; }
+  dialog#apiKeyDialog input {
+    width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+    border: 2px solid #e2e7ff;
+    margin: 10px 0 16px;
+    font-size: 14px;
+  }
+  dialog#apiKeyDialog::backdrop { background: rgba(20, 30, 90, 0.5); }
+
+  dialog#historyDialog, dialog#helpDialog {
+    border: none;
+    border-radius: 20px;
+    padding: 0;
+    width: 92%;
+    max-width: 460px;
+    max-height: 78vh;
+    background: var(--card);
+    color: var(--text);
+  }
+  dialog#historyDialog::backdrop, dialog#helpDialog::backdrop {
+    background: rgba(20, 30, 90, 0.5);
+  }
+  .dialog-inner {
+    padding: 24px;
+    max-height: 78vh;
+    overflow-y: auto;
+  }
+  .dialog-inner h3 {
+    font-family: 'Baloo', sans-serif;
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .dialog-close {
+    border: none;
+    background: var(--bg);
+    color: var(--text);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 15px;
+  }
+
+  .history-entry {
+    background: var(--bg);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    border: 1px solid var(--border);
+  }
+  .history-entry .meta {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 4px;
+  }
+  .history-empty {
+    color: var(--muted);
+    font-style: italic;
+    font-size: 14px;
+    text-align: center;
+    padding: 20px 0;
+  }
+  .clear-history-btn {
+    margin-top: 8px;
+    background: none;
+    border: none;
+    color: #B00020;
+    font-size: 13px;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .help-section { margin-bottom: 18px; }
+  .help-section h4 {
+    font-size: 14px;
+    margin: 0 0 6px;
+    color: var(--indigo);
+  }
+  [data-theme="dark"] .help-section h4 { color: var(--sky); }
+  .help-section p {
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="bg-blob blob1"></span>
+  <span class="bg-blob blob2"></span>
+  <span class="bg-blob blob3"></span>
+  <span class="bg-blob blob4"></span>
+
+  <nav>
+    <div class="brand">
+      <img src="icons/icon-192.png" alt="SenseBuddy logo" />
+      <span>SenseBuddy</span>
+    </div>
+    <div class="nav-icons">
+      <button class="icon-btn" id="themeToggleBtn" title="Toggle dark mode">🌙</button>
+      <button class="icon-btn" id="historyBtn" title="History">🕘</button>
+      <button class="icon-btn" id="helpBtn" title="Help & About">❓</button>
+      <a class="cta" href="#app">Try it now ↓</a>
+    </div>
+  </nav>
+
+  <div class="hero-inner">
+    <span class="eyebrow">✨ Built for Alexa+ · accessibility companion</span>
+    <h1>A sense for those <span class="accent">who need one</span></h1>
+    <p class="lead">SenseBuddy narrates the world for people who can't see it, and speaks out loud for people who can't say it — one companion, two senses.</p>
+    <div class="hero-mascot-wrap">
+      <img src="icons/icon-192.png" alt="SenseBuddy mascot" />
+    </div>
+  </div>
+</div>
+
+<main id="app">
+
+  <div class="install-banner" id="installBanner">
+    <span>📲 Install SenseBuddy as an app on your phone</span>
+    <button id="installBtn">Install</button>
+  </div>
+
+  <div class="mode-switch">
+    <button id="tabVision" class="active">👁️ Vision Mode</button>
+    <button id="tabVoice">🗣️ Voice Mode</button>
+  </div>
+
+  <!-- VISION MODE -->
+  <div class="panel" id="visionCard">
+    <div class="panel-visual">
+      <video id="cameraFeed" autoplay playsinline muted style="display:none;"></video>
+      <div class="camera-placeholder" id="cameraPlaceholder">📷</div>
+      <canvas id="captureCanvas" style="display:none;"></canvas>
+    </div>
+    <div class="panel-form">
+      <h2>Describe my surroundings</h2>
+      <p class="sub">Turn on the camera, then choose how SenseBuddy should help — live narration, ask it anything, or have it read text aloud.</p>
+
+      <button class="big-btn btn-primary" id="startCameraBtn">📷 Turn on camera</button>
+
+      <div id="visionControls" style="display:none;">
+
+        <div class="live-toggle-row">
+          <div>
+            <strong>Live narration</strong>
+            <div class="tiny-sub">Auto-describes every few seconds, and warns you of hazards</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="liveToggle" />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div id="hazardBanner" class="hazard-banner" style="display:none;">
+          ⚠️ <span id="hazardText"></span>
+        </div>
+
+        <button class="big-btn btn-yellow" id="describeBtn">
+          ✨ Describe what's around me
+          <span class="speaking-wave" id="visionWave"><span></span><span></span><span></span></span>
+        </button>
+
+        <button class="big-btn btn-outline" id="readTextBtn">📖 Read text or signs</button>
+
+        <div class="divider-label">ASK A QUESTION</div>
+        <div class="question-row">
+          <input type="text" id="visionQuestionInput" placeholder="e.g. is there a chair in front of me?" class="text-input" />
+          <button class="mic-inline-btn" id="dictateQuestionBtn">🎤</button>
+        </div>
+        <button class="big-btn btn-primary" id="askVisionBtn">🔎 Ask SenseBuddy</button>
+      </div>
+
+      <div class="result-box placeholder" id="visionResult">
+        Your description will appear here — and SenseBuddy will speak it out loud too.
+      </div>
+    </div>
+  </div>
+
+  <!-- VOICE MODE -->
+  <div class="panel" id="voiceCard" style="display:none;">
+    <div class="panel-form" style="grid-column: 1 / -1; max-width: 640px; margin: 0 auto;">
+      <h2>Speak for me</h2>
+      <p class="sub">Type or dictate what you want to say, and SenseBuddy will say it out loud for you.</p>
+
+      <textarea id="messageInput" placeholder="Type what you'd like SenseBuddy to say out loud..."></textarea>
+
+      <div class="btn-row">
+        <button class="big-btn btn-outline" id="dictateBtn" style="flex:1;">🎤 Dictate</button>
+        <button class="big-btn btn-primary" id="speakBtn" style="flex:1;">
+          🔊 Speak it
+          <span class="speaking-wave" id="speakWave"><span></span><span></span><span></span></span>
+        </button>
+      </div>
+
+      <div class="mic-status" id="micStatus">
+        <span class="dot" id="micDot"></span>
+        <span id="micStatusText">Mic idle</span>
+      </div>
+
+      <div class="divider-label">HEAR THEIR REPLY</div>
+      <p class="sub" style="margin-top:-10px;">Tap listen, and SenseBuddy will turn what they say into text on screen.</p>
+      <button class="big-btn btn-outline" id="listenReplyBtn">👂 Listen for a reply</button>
+      <div class="result-box placeholder" id="replyResult">
+        Their reply will appear here as text.
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-link" style="margin-top:20px;">
+  </div>
+</main>
+
+<div class="features">
+  <div class="feature-card">
+    <span class="emoji">👁️</span>
+    <h3>Sees for you</h3>
+    <p>Live camera narration that feels like a friend describing the room, not a robot reading labels.</p>
+  </div>
+  <div class="feature-card">
+    <span class="emoji">🗣️</span>
+    <h3>Speaks for you</h3>
+    <p>Type or dictate, and SenseBuddy becomes your voice — instantly, out loud, in real conversation.</p>
+  </div>
+  <div class="feature-card">
+    <span class="emoji">💙</span>
+    <h3>One companion</h3>
+    <p>Two very different needs, one unified experience — designed to feel warm, not clinical.</p>
+  </div>
+</div>
+
+<footer>
+  Made with 💙 by <strong>Palak Soni</strong> — SenseBuddy, for the Build, Ship, Shape: Amazon Developer Hackathon
+</footer>
+
+<dialog id="historyDialog">
+  <div class="dialog-inner">
+    <h3>🕘 History <button class="dialog-close" id="closeHistoryBtn">✕</button></h3>
+    <div id="historyList"></div>
+    <button class="clear-history-btn" id="clearHistoryBtn">Clear history</button>
+  </div>
+</dialog>
+
+<dialog id="helpDialog">
+  <div class="dialog-inner">
+    <h3>❓ Help & About <button class="dialog-close" id="closeHelpBtn">✕</button></h3>
+
+    <div class="help-section">
+      <h4>👁️ Vision Mode</h4>
+      <p>Turn on your camera. Tap "Describe what's around me" any time for a one-time description. Turn on "Live narration" for SenseBuddy to keep describing your surroundings automatically and warn you of hazards. Use "Read text or signs" to have any visible text read aloud. Ask a specific question anytime, by typing or using the mic.</p>
+    </div>
+
+    <div class="help-section">
+      <h4>🗣️ Voice Mode</h4>
+      <p>Type or dictate a message, then tap "Speak it" and SenseBuddy will say it out loud for you. Use "Listen for a reply" to have someone's spoken response turned into text on screen.</p>
+    </div>
+
+    <div class="help-section">
+      <h4>🕘 History</h4>
+      <p>Every description, answer, and message is saved here on your device so you can revisit it later. Nothing is sent anywhere except directly to Google's Gemini API for processing.</p>
+    </div>
+
+    <div class="help-section">
+      <h4>🔐 Privacy</h4>
+      <p>SenseBuddy runs entirely through a private backend — you never need to enter any API key. Your camera image is sent securely for one-time processing and is never stored.</p>
+    </div>
+
+    <div class="help-section">
+      <h4>💙 About</h4>
+      <p>SenseBuddy was designed and built by Palak Soni for the Build, Ship, Shape: Amazon Developer Hackathon — an accessibility companion that becomes a sense for those who need one.</p>
+    </div>
+  </div>
+</dialog>
+
+<script src="app.js"></script>
+</body>
+</html>
