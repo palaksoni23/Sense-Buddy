@@ -24,7 +24,12 @@ tabVoice.addEventListener('click', () => {
 // This is your deployed backend URL (from the /server folder) — it holds the
 // Gemini key privately, so users never need to enter their own key.
 // UPDATE THIS after you deploy the backend on Render.
-const BACKEND_URL = 'https://sense-buddy-backend.onrender.com'; 
+const BACKEND_URL = 'https://sense-buddy-backend.onrender.com';
+
+// Render's free tier spins down the backend after inactivity, and the first
+// request afterwards can take 30-50s to wake it up. Ping it silently as soon
+// as the page loads, so it's already awake by the time the user taps a button.
+fetch(`${BACKEND_URL}/`).catch(() => {});
 
 // ---------- Web Speech API detection (shared across modes) ----------
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -164,7 +169,9 @@ function captureFrameBase64() {
 
 async function callGeminiVision(base64Image, promptText, retryCount = 0) {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 12000);
+  // Render's free tier can take 30-50s to wake up from sleep on the first
+  // request after inactivity, so we allow a generous timeout here.
+  const timeoutId = setTimeout(() => controller.abort(), 45000);
 
   let response;
   try {
@@ -215,7 +222,7 @@ describeBtn.addEventListener('click', async () => {
   describeBtn.disabled = true;
   describeBtn.classList.add('pulse-once');
   visionWave.classList.add('active');
-  visionResult.textContent = '👀 Looking around...';
+  visionResult.textContent = '👀 Looking around... (first request of the session may take up to a minute while the server wakes up)';
   visionResult.classList.add('placeholder');
 
   try {
