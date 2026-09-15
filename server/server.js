@@ -43,7 +43,7 @@ app.post('/api/vision', async (req, res) => {
     };
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000);
+    const timeoutId = setTimeout(() => controller.abort(), 40000);
 
     let response;
     try {
