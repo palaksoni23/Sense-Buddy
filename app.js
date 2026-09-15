@@ -24,7 +24,7 @@ tabVoice.addEventListener('click', () => {
 // This is your deployed backend URL (from the /server folder) — it holds the
 // Gemini key privately, so users never need to enter their own key.
 // UPDATE THIS after you deploy the backend on Render.
-const BACKEND_URL = 'https://sensebuddy-backend.onrender.com';
+const BACKEND_URL = 'https://sense-buddy-backend.onrender.com'; 
 
 // ---------- Web Speech API detection (shared across modes) ----------
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
